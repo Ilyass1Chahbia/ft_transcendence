@@ -25,7 +25,7 @@ export default function Game() {
         ref={canvasRef}
         width={800}
         height={600}
-        className="border-4 border-white"
+        className="border-4 border-yellow-500 bg-slate-950"
       />
       <button
         className="mt-6 bg-red-500 hover:bg-red-600 px-6 py-3 rounded font-bold text-black"

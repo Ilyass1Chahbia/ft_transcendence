@@ -34,9 +34,9 @@ export default function PlayerForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col items-center space-y-4 p-6 bg-yellow-500 rounded-xl shadow-neutral-900"
+      className="flex flex-col items-center space-y-4 p-6 py-4 bg-yellow-500 rounded-xl shadow-neutral-900"
     >
-      <h1 className="text-2xl font-bold text-gray-700">Enter Players</h1>
+      <h1 className="text-2xl flex mb-15 border p-1 border-slate-950 font-bold text-slate-950">Enter Players</h1>
 
       {players.map((player, i) => (
         <div key={i} className="flex items-center space-x-2">
@@ -45,12 +45,12 @@ export default function PlayerForm({
             placeholder={`Player ${i + 1}`}
             value={player}
             onChange={(e) => handleChange(i, e.target.value)}
-            className="w-64 p-2 border text-black border-b-cyan-950 rounded-lg"
+            className="w-64 p-2 border text-slate-950 border-b-slate-950 focus:outline-none"
           />
           <button
             type="button"
             onClick={() => removePlayer(i)}
-            className="px-2 py-1 bg-red-500 text-cyan-950 rounded hover:bg-red-600 transition"
+            className="px-2 py-1 border text-slate-950 rounded hover:bg-slate-950 hover:text-yellow-500 transition duration-600"
           >
             Remove
           </button>
@@ -60,14 +60,14 @@ export default function PlayerForm({
       <button
         type="button"
         onClick={addPlayer}
-        className="px-4 py-2 bg-green-500 text-cyan-950 rounded hover:bg-green-600 transition"
+        className="px-12.5 py-2 border text-slate-950 rounded hover:bg-slate-950 hover:text-yellow-500 transition duration-600"
       >
         Add Player
       </button>
 
       <button
         type="submit"
-        className="px-6 py-2 bg-indigo-700 text-cyan-950 rounded-lg hover:bg-blue-600 transition"
+        className="px-7 py-2 border text-slate-950 rounded hover:bg-slate-950 hover:text-yellow-500 transition duration-600"
       >
         Start Tournament
       </button>

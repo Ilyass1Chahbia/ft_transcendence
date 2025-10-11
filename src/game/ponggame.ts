@@ -1,191 +1,196 @@
-// pongGame.ts
-
 export interface PongOptions {
   canvas: HTMLCanvasElement;
   leftPlayer: string;
   rightPlayer: string;
-  handleMatchEnd: (left: string, right: string, lScore: number, rScore: number) => void;
+  handleMatchEnd: (winner: string) => void;
+  winScore?: number;
 }
+
+let animationFrame: number | null = null;
 
 export function startPong({
   canvas,
   leftPlayer,
   rightPlayer,
   handleMatchEnd,
+  winScore = 5,
 }: PongOptions) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
-  canvas.width = 800;
-  canvas.height = 400;
+  // --- Game State ---
+  const paddleWidth = 15;
+  const paddleHeight = 100;
+  const paddleSpeed = 8;
 
-  const paddleHeight = 80;
-  const paddleWidth = 10;
+  const ballRadius = 10;
+  const initialSpeed = 6;
 
-  let leftY = canvas.height / 2 - paddleHeight / 2;
-  let rightY = canvas.height / 2 - paddleHeight / 2;
-  const paddleSpeed = 6;
+  const leftPaddle = {
+    x: 0,
+    y: canvas.height / 2 - paddleHeight / 2,
+    dy: 0,
+  };
 
-  let ballX = canvas.width / 2;
-  let ballY = canvas.height / 2;
-  let ballSpeedX = 2;
-  let ballSpeedY = 2;
-  const ballRadius = 8;
+  const rightPaddle = {
+    x: canvas.width - paddleWidth,
+    y: canvas.height / 2 - paddleHeight / 2,
+    dy: 0,
+  };
+
+  const ball = {
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    dx: Math.random() > 0.5 ? initialSpeed : -initialSpeed,
+    dy: (Math.random() - 0.5) * 4,
+  };
 
   let leftScore = 0;
   let rightScore = 0;
-  const winningScore = 5; // stop game at 5
-
   let gameOver = false;
-  let animationId: number;
 
-  function resetBall() {
-    ballX = canvas.width / 2;
-    ballY = canvas.height / 2;
-    ballSpeedX = -ballSpeedX;
-    ballSpeedY = 3 * (Math.random() > 0.5 ? 1 : -1);
+  // --- Input ---
+  const keys: Record<string, boolean> = {};
+  function keyDown(e: KeyboardEvent) {
+    keys[e.key] = true;
   }
-
-  function draw() {
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // paddles
-    ctx.fillStyle = "white";
-    ctx.fillRect(20, leftY, paddleWidth, paddleHeight);
-    ctx.fillRect(canvas.width - 20 - paddleWidth, rightY, paddleWidth, paddleHeight);
-
-    // ball
-    ctx.beginPath();
-    ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
-    ctx.fill();
-
-    // scores
-    ctx.font = "24px Arial";
-    ctx.fillStyle = "white";
-    ctx.fillText(leftScore.toString(), canvas.width / 4, 30);
-    ctx.fillText(rightScore.toString(), (3 * canvas.width) / 4, 30);
-
-    // === GAME OVER screen ===
-    if (gameOver) {
-      ctx.fillStyle = "white";
-      ctx.font = "40px Arial";
-      ctx.textAlign = "center";
-
-      let winner =
-        leftScore > rightScore ? `${leftPlayer} Wins!` : `${rightPlayer} Wins!`;
-
-      ctx.fillText("GAME OVER", canvas.width / 2 - 120, canvas.height / 2 - 60);
-      ctx.fillText(winner, canvas.width / 2 + 120, canvas.height / 2 + 40);
-
-      // Show "Back to Main Menu" button
-      showMainMenuButton();
-    }
+  function keyUp(e: KeyboardEvent) {
+    keys[e.key] = false;
   }
+  document.addEventListener("keydown", keyDown);
+  document.addEventListener("keyup", keyUp);
 
+  // --- Physics ---
   function update() {
     if (gameOver) return;
 
-    ballX += ballSpeedX;
-    ballY += ballSpeedY;
+    // Move paddles
+    if (keys["w"]) leftPaddle.y -= paddleSpeed;
+    if (keys["s"]) leftPaddle.y += paddleSpeed;
+    if (keys["ArrowUp"]) rightPaddle.y -= paddleSpeed;
+    if (keys["ArrowDown"]) rightPaddle.y += paddleSpeed;
 
-    if (ballY - ballRadius < 0 || ballY + ballRadius > canvas.height) {
-      ballSpeedY = -ballSpeedY;
+    // Clamp paddles inside canvas
+    leftPaddle.y = Math.max(0, Math.min(canvas.height - paddleHeight, leftPaddle.y));
+    rightPaddle.y = Math.max(0, Math.min(canvas.height - paddleHeight, rightPaddle.y));
+
+    // Move ball
+    ball.x += ball.dx;
+    ball.y += ball.dy;
+
+    // --- Wall collisions (top/bottom) ---
+    if (ball.y - ballRadius <= 0) {
+      ball.y = ballRadius;
+      ball.dy *= -1;
+    } else if (ball.y + ballRadius >= canvas.height) {
+      ball.y = canvas.height - ballRadius;
+      ball.dy *= -1;
     }
 
+    // --- Paddle collisions ---
+    // Left paddle
     if (
-      ballX - ballRadius < 20 + paddleWidth &&
-      ballY > leftY &&
-      ballY < leftY + paddleHeight
+      ball.x - ballRadius <= leftPaddle.x + paddleWidth &&
+      ball.y >= leftPaddle.y &&
+      ball.y <= leftPaddle.y + paddleHeight
     ) {
-      ballSpeedX = -ballSpeedX;
+      ball.x = leftPaddle.x + paddleWidth + ballRadius; // reposition
+      const relativeIntersectY = ball.y - (leftPaddle.y + paddleHeight / 2);
+      const normalized = relativeIntersectY / (paddleHeight / 2);
+      const maxBounceAngle = Math.PI / 4; // 45°
+      const bounceAngle = normalized * maxBounceAngle;
+      const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy) * 1.05; // slight acceleration
+
+      ball.dx = Math.abs(speed * Math.cos(bounceAngle));
+      ball.dy = speed * Math.sin(bounceAngle);
     }
 
+    // Right paddle
     if (
-      ballX + ballRadius > canvas.width - 20 - paddleWidth &&
-      ballY > rightY &&
-      ballY < rightY + paddleHeight
+      ball.x + ballRadius >= rightPaddle.x &&
+      ball.y >= rightPaddle.y &&
+      ball.y <= rightPaddle.y + paddleHeight
     ) {
-      ballSpeedX = -ballSpeedX;
+      ball.x = rightPaddle.x - ballRadius; // reposition
+      const relativeIntersectY = ball.y - (rightPaddle.y + paddleHeight / 2);
+      const normalized = relativeIntersectY / (paddleHeight / 2);
+      const maxBounceAngle = Math.PI / 4;
+      const bounceAngle = normalized * maxBounceAngle;
+      const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy) * 1.05;
+
+      ball.dx = -Math.abs(speed * Math.cos(bounceAngle));
+      ball.dy = speed * Math.sin(bounceAngle);
     }
 
-    if (ballX - ballRadius < 0) {
+    // --- Scoring ---
+    if (ball.x + ballRadius < 0) {
       rightScore++;
-      if (rightScore >= winningScore) {
-        endGame();
-        return;
-      }
-      resetBall();
+      resetBall("right");
+    } else if (ball.x - ballRadius > canvas.width) {
+      leftScore++;
+      resetBall("left");
     }
 
-    if (ballX + ballRadius > canvas.width) {
-      leftScore++;
-      if (leftScore >= winningScore) {
-        endGame();
-        return;
-      }
-      resetBall();
+    if (leftScore >= winScore) {
+      endGame(leftPlayer);
+    } else if (rightScore >= winScore) {
+      endGame(rightPlayer);
     }
   }
 
-  function gameLoop() {
+  function resetBall(direction: "left" | "right") {
+    ball.x = canvas.width / 2;
+    ball.y = canvas.height / 2;
+    const dir = direction === "left" ? -1 : 1;
+    ball.dx = dir * initialSpeed;
+    ball.dy = (Math.random() - 0.5) * 4;
+  }
+
+  function endGame(winner: string) {
+    gameOver = true;
+    cancelAnimationFrame(animationFrame!);
+    handleMatchEnd(winner);
+  }
+
+  // --- Draw ---
+  function draw() {
+    ctx.fillStyle = "#020618";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw paddles
+    ctx.fillStyle = "#EAB308";
+    ctx.fillRect(leftPaddle.x, leftPaddle.y, paddleWidth, paddleHeight);
+    ctx.fillRect(rightPaddle.x, rightPaddle.y, paddleWidth, paddleHeight);
+
+    // Draw ball
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ballRadius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw scores
+    ctx.font = "24px Arial";
+    ctx.fillText(`${leftPlayer}: ${leftScore}`, 50, 30);
+    ctx.fillText(`${rightPlayer}: ${rightScore}`, canvas.width - 200, 30);
+  }
+
+  function loop() {
     update();
     draw();
-    if (!gameOver) {
-      animationId = requestAnimationFrame(gameLoop);
-    }
+    if (!gameOver) animationFrame = requestAnimationFrame(loop);
   }
 
-  function endGame() {
-    gameOver = true;
-    cancelAnimationFrame(animationId);
-    handleMatchEnd(leftPlayer, rightPlayer, leftScore, rightScore);
-    draw();
+  loop();
+
+  // Cleanup listeners when stopping
+  return () => {
+    document.removeEventListener("keydown", keyDown);
+    document.removeEventListener("keyup", keyUp);
+  };
+}
+
+export function stopPong() {
+  if (animationFrame) {
+    cancelAnimationFrame(animationFrame);
+    animationFrame = null;
   }
-
-  // === MAIN MENU BUTTON ===
-  function showMainMenuButton() {
-    let button = document.getElementById("mainMenuBtn") as HTMLButtonElement;
-
-    if (!button) {
-      button = document.createElement("button");
-      button.id = "mainMenuBtn";
-      button.innerText = "Back to Main Menu";
-
-      // style
-      button.style.position = "absolute";
-      button.style.top = "50%";
-      button.style.left = "50%";
-      button.style.transform = "translate(-50%, -50%)";
-      button.style.padding = "10px 20px";
-      button.style.fontSize = "18px";
-      button.style.backgroundColor = "indigo";
-      button.style.border = "2px solid black";
-      button.style.cursor = "pointer";
-
-      // on click
-      button.onclick = () => {
-        window.location.href = "/";
-      };
-
-      document.body.appendChild(button);
-    }
-  }
-
-  // Paddle movement
-  const keys: Record<string, boolean> = {};
-  window.addEventListener("keydown", (e) => (keys[e.key] = true));
-  window.addEventListener("keyup", (e) => (keys[e.key] = false));
-
-  function movePaddles() {
-    if (keys["w"] && leftY > 0) leftY -= paddleSpeed;
-    if (keys["s"] && leftY < canvas.height - paddleHeight) leftY += paddleSpeed;
-    if (keys["ArrowUp"] && rightY > 0) rightY -= paddleSpeed;
-    if (keys["ArrowDown"] && rightY < canvas.height - paddleHeight) rightY += paddleSpeed;
-
-    if (!gameOver) requestAnimationFrame(movePaddles);
-  }
-
-  gameLoop();
-  movePaddles();
 }
