@@ -117,13 +117,13 @@ export default function Tournament() {
       {/* Game Type Switch */}
       <div className="mb-4 flex gap-4">
         <button
-          className={`px-4 py-2 rounded ${gameType === "pong" ? "bg-yellow-500 text-slate-950" : "bg-slate-950 text-yellow-500 border border-yellow-500"}`}
+          className={`px-4 py-2 rounded ${gameType === "pong" ? "bg-yellow-500 text-slate-950" : "bg-slate-950 text-yellow-500 border border-yellow-500 hover:bg-yellow-500 hover:text-slate-950 transition duration-600"}`}
           onClick={() => setGameType("pong")}
         >
           Play Pong
         </button>
         <button
-          className={`px-4 py-2 rounded ${gameType === "xo" ? "bg-yellow-500 text-slate-950" : "bg-slate-950 text-yellow-500 border border-yellow-500"}`}
+          className={`px-4 py-2 rounded ${gameType === "xo" ? "bg-yellow-500 text-slate-950" : "bg-slate-950 text-yellow-500 border border-yellow-500 hover:bg-yellow-500 hover:text-slate-950 transition duration-600"}`}
           onClick={() => setGameType("xo")}
         >
           Play X-O
