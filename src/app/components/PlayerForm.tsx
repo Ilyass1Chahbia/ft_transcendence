@@ -38,7 +38,7 @@ export default function PlayerForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col items-center space-y-4 p-6 py-4 bg-yellow-300 rounded-xl shadow-neutral-900"
+      className="flex flex-col items-center space-y-4 p-6 py-4 bg-yellow-400 rounded-xl shadow-neutral-900"
     >
       <h1 className="text-2xl flex mb-15 border p-1 border-black font-bold text-black">Enter Players</h1>
 
@@ -54,7 +54,7 @@ export default function PlayerForm({
           <button
             type="button"
             onClick={() => removePlayer(i)}
-            className="px-2 py-1 border text-black rounded hover:bg-black hover:text-yellow-300 transition duration-600"
+            className="px-2 py-1 border text-black rounded hover:bg-black hover:text-yellow-400 transition duration-600"
           >
             Remove
           </button>
@@ -64,14 +64,14 @@ export default function PlayerForm({
       <button
         type="button"
         onClick={addPlayer}
-        className="px-12.5 py-2 border text-black rounded hover:bg-black hover:text-yellow-300 transition duration-600"
+        className="px-12.5 py-2 border text-black rounded hover:bg-black hover:text-yellow-400 transition duration-600"
       >
         Add Player
       </button>
 
       <button
         type="submit"
-        className="px-7 py-2 border text-black rounded hover:bg-black hover:text-yellow-300 transition duration-600"
+        className="px-7 py-2 border text-black rounded hover:bg-black hover:text-yellow-400 transition duration-600"
       >
         Start Tournament
       </button>

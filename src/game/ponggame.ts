@@ -2,7 +2,7 @@ export interface PongOptions {
   canvas: HTMLCanvasElement;
   leftPlayer: string;
   rightPlayer: string;
-  handleMatchEnd: (winner: string) => void;
+  handleMatchEnd: (winner: string | null, finalScores: { left: number; right: number }) => void;
   winScore?: number;
   map: "default" | "inverted";
   onScoreUpdate: (scores: { left: number; right: number }) => void;
@@ -25,15 +25,15 @@ export function startPong({
   const colors = {
     default: {
       background: "#000000",
-      paddle: "#ffdf20",
-      ball: "#ffdf20",
-      text: "#ffdf20",
+      paddle: "#EAB308",
+      ball: "#EAB308",
+      text: "#EAB308",
     },
     inverted: {
-      background: "#ffdf20",
-      paddle: "#000000",
-      ball: "#000000",
-      text: "#000000",
+      background: "#EAB308",
+      paddle: "#020618",
+      ball: "#020618",
+      text: "#020618",
     },
   };
 
@@ -45,7 +45,7 @@ export function startPong({
   const paddleSpeed = 8;
 
   const ballRadius = 10;
-  const initialSpeed = 5;
+  const initialSpeed = 6;
 
   const leftPaddle = {
     x: 0,
@@ -137,7 +137,7 @@ export function startPong({
       const normalized = relativeIntersectY / (paddleHeight / 2);
       const maxBounceAngle = Math.PI / 4; // 45°
       const bounceAngle = normalized * maxBounceAngle;
-      const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy) * 1.02; // slight acceleration
+      const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy) * 1.05; // slight acceleration
 
       ball.dx = Math.abs(speed * Math.cos(bounceAngle));
       ball.dy = speed * Math.sin(bounceAngle);
@@ -240,7 +240,7 @@ export function startPong({
     gameOver = true;
     if (countdownInterval) clearInterval(countdownInterval);
     cancelAnimationFrame(animationFrame!);
-    handleMatchEnd(winner);
+    handleMatchEnd(winner, { left: leftScore, right: rightScore });
   }
 
   function updateScoreAnimation() {
@@ -296,7 +296,7 @@ export function startPong({
       ctx.fillText(
         scoreToAnimate.score,
         canvas.width / 2,
-        canvas.height / 2 - 200
+        canvas.height / 2 - 208
       );
       ctx.globalAlpha = 1.0; // Reset alpha
     }
@@ -308,7 +308,7 @@ export function startPong({
     draw();
     if (!gameOver) animationFrame = requestAnimationFrame(loop);
   }
-
+  
   resetRound(Math.random() > 0.5 ? "left" : "right");
   loop();
 

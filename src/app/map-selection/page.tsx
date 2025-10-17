@@ -34,8 +34,8 @@ export default function MapSelection() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950">
-      <h1 className="text-3xl font-bold text-yellow-500 mb-8">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-black">
+      <h1 className="text-3xl font-bold text-yellow-400 mb-8">
         Choose a Map
       </h1>
       <div className="flex gap-8">
@@ -43,24 +43,24 @@ export default function MapSelection() {
           className="cursor-pointer"
           onClick={() => handleMapSelection("default")}
         >
-          <h2 className="text-xl text-center text-yellow-500 mb-2">
+          <h2 className="text-xl text-center text-yellow-400 mb-2">
             Default Map
           </h2>
-          <div className="w-64 h-48 border-4 border-yellow-500 bg-slate-950 flex items-center justify-between p-2">
-            <div className="w-4 h-16 bg-yellow-500"></div>
-            <div className="w-4 h-16 bg-yellow-500"></div>
+          <div className="w-64 h-48 border-4 border-yellow-400 bg-black flex items-center justify-between p-2">
+            <div className="w-4 h-16 bg-yellow-400"></div>
+            <div className="w-4 h-16 bg-yellow-400"></div>
           </div>
         </div>
         <div
           className="cursor-pointer"
           onClick={() => handleMapSelection("inverted")}
         >
-          <h2 className="text-xl text-center text-yellow-500 mb-2">
+          <h2 className="text-xl text-center text-yellow-400 mb-2">
             Inverted Map
           </h2>
-          <div className="w-64 h-48 border-4 border-slate-950 bg-yellow-500 flex items-center justify-between p-2">
-            <div className="w-4 h-16 bg-slate-950"></div>
-            <div className="w-4 h-16 bg-slate-950"></div>
+          <div className="w-64 h-48 border-4 border-black bg-yellow-400 flex items-center justify-between p-2">
+            <div className="w-4 h-16 bg-black"></div>
+            <div className="w-4 h-16 bg-black"></div>
           </div>
         </div>
       </div>

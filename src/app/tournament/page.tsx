@@ -39,15 +39,16 @@ export default function Tournament() {
 
   const currentMatch = matches ? matches[currentMatchIndex] : null;
 
-  const handleMatchEnd = (winner: string | null) => {
+  const handleMatchEnd = (winner: string | null, finalScores: { left: number; right: number }) => {
     setMatchEnded(true);
-    const finalScore = `${scores.left} - ${scores.right}`;
+    const finalScore = `${finalScores.left} - ${finalScores.right}`;
     if (winner) {
       setWinnerInfo({ winner, score: finalScore });
     } else {
       setWinnerInfo({ winner: "Draw!", score: finalScore });
     }
   };
+
 
   useEffect(() => {
     if (isLoading || !canvasRef.current || !currentMatch) return;
@@ -79,7 +80,7 @@ export default function Tournament() {
         canvas: canvasRef.current,
         playerX: player1,
         playerO: player2,
-        handleGameEnd: handleMatchEnd,
+        handleGameEnd,
       });
     }
 
@@ -123,7 +124,7 @@ export default function Tournament() {
         canvas: canvasRef.current,
         playerX: player1,
         playerO: player2,
-        handleGameEnd: handleMatchEnd,
+        handleGameEnd,
       });
     }
   };
@@ -134,17 +135,17 @@ export default function Tournament() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black">
-      <h1 className="text-3xl font-bold text-yellow-300 mb-4">Tournament</h1>
+      <h1 className="text-3xl font-bold text-yellow-400 mb-4">Tournament</h1>
 
       <div className="mb-4 flex gap-4">
         <button
-          className={`px-4 py-2 rounded ${gameType === "pong" ? "bg-yellow-300 text-black" : "bg-black text-yellow-300 border border-yellow-500 hover:bg-yellow-300 hover:text-black transition duration-600"}`}
+          className={`px-4 py-2 rounded ${gameType === "pong" ? "bg-yellow-400 text-black" : "bg-black text-yellow-400 border border-yellow-400 hover:bg-yellow-400 hover:text-black transition duration-600"}`}
           onClick={() => setGameType("pong")}
         >
           Play Pong
         </button>
         <button
-          className={`px-4 py-2 rounded ${gameType === "xo" ? "bg-yellow-300 text-black" : "bg-black text-yellow-300 border border-yellow-500 hover:bg-yellow-300 hover:text-black transition duration-600"}`}
+          className={`px-4 py-2 rounded ${gameType === "xo" ? "bg-yellow-400 text-black" : "bg-black text-yellow-400 border border-yellow-400 hover:bg-yellow-400 hover:text-black transition duration-600"}`}
           onClick={() => setGameType("xo")}
         >
           Play X-O
@@ -153,47 +154,61 @@ export default function Tournament() {
 
       {currentMatch && currentMatch.length === 2 && (
         <div className="w-full max-w-[600px] flex justify-between items-center mb-6 px-4">
-          <div className="text-2xl text-yellow-300 font-bold text-left flex-1">
+          <div className="text-2xl text-yellow-400 font-bold text-left flex-1">
             {currentMatch[0]}
           </div>
-          <div className="text-4xl text-yellow-300 font-bold">
+          <div className="text-4xl text-yellow-400 font-bold">
             {scores.left} - {scores.right}
           </div>
-          <div className="text-2xl text-yellow-300 font-bold text-right flex-1">
+          <div className="text-2xl text-yellow-400 font-bold text-right flex-1">
             {currentMatch[1]}
           </div>
         </div>
       )}
 
-      <canvas
-        ref={canvasRef}
-        width={600}
-        height={600}
-        className="border border-yellow-500 bg-black mb-4"
-      />
+      <div className="w-full max-w-[600px] mb-4">
+        <canvas
+          ref={canvasRef}
+          width={600}
+          height={600}
+          className="border border-yellow-400 bg-black"
+        />
+      </div>
 
       {/* Winner Pop-up */}
       {winnerInfo && (
-        <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-70 flex items-center justify-center">
-          <div className="bg-yellow-300 text-black p-10 rounded-lg text-center shadow-lg">
-            <h2 className="text-4xl font-bold mb-4">
-              {winnerInfo.winner === "Draw!" ? "It's a Draw!" : `${winnerInfo.winner} Wins!`}
-            </h2>
-            <p className="text-2xl mb-6">Final Score: {winnerInfo.score}</p>
-            <div className="flex gap-4 justify-center">
-              <button
-                className="bg-black hover:bg-slate-800 text-yellow-300 px-6 py-3 rounded font-bold"
-                onClick={handleRestart}
-              >
-                Restart Match
-              </button>
-              <button
-                className="bg-black hover:bg-slate-800 text-yellow-300 px-6 py-3 rounded font-bold"
-                onClick={handleNextMatch}
-              >
-                Next Match
-              </button>
-            </div>
+        <div
+          className={`absolute p-10 rounded-lg text-center shadow-lg ${
+            map === "inverted"
+              ? "bg-black text-yellow-400"
+              : "bg-yellow-400 text-black"
+          }`}
+        >
+          <h2 className="text-4xl font-bold mb-4">
+            {winnerInfo.winner === "Draw!" ? "It's a Draw!" : `${winnerInfo.winner} Wins!`}
+          </h2>
+          <p className="text-2xl mb-6">Final Score: {winnerInfo.score}</p>
+          <div className="flex gap-4 justify-center">
+            <button
+              className={`px-6 py-3 rounded font-bold ${
+                map === "inverted"
+                  ? "bg-yellow-400 text-black hover:bg-yellow-600"
+                  : "bg-black text-yellow-400 hover:bg-slate-900"
+              }`}
+              onClick={handleRestart}
+            >
+              Restart Match
+            </button>
+            <button
+              className={`px-6 py-3 rounded font-bold ${
+                map === "inverted"
+                  ? "bg-yellow-400 text-black hover:bg-yellow-600"
+                  : "bg-black text-yellow-400 hover:bg-slate-900"
+              }`}
+              onClick={handleNextMatch}
+            >
+              Next Match
+            </button>
           </div>
         </div>
       )}
